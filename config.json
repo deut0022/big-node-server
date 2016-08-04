@@ -1,0 +1,51 @@
+{
+    "logLevel": "info",
+    "splunkLoggingEnabled": true,
+    "weatherLoggingEnabled": true,
+    "weatherConfig": {
+      "host": "api.openweathermap.org",
+      "path": "/data/2.5/weather?id=5025219&APPID=a7df4adc18d04bf6d7333877bb7cb5fa",
+      "schedule": "EVERY_30_MIN"
+    },
+    "splunkConfig": {
+        "host": "localhost",
+        "username": "",
+        "password": "",
+        "username-parallel": "admin",
+        "password-parallel": "Password1",
+        "port": 9997,
+        "scheme": "http",
+        "pointsIndex": "parallel",
+        "weatherIndex": "weather_ep",
+        "version": "6.4.2"
+    },
+    "jaces": [{
+        "id": 1,
+        "host": "172.20.12.88",
+        "name": "Parallel Sprinkler JACE",
+        "username": "admin",
+        "password": "PTI!7667",
+        "authenticationType": "BASIC"
+    }],
+    "points": [{
+        "id": "@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone1",
+        "schedule": "EVERY_1_MIN",
+        "jaceId": 1
+    }, {
+        "id": "@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone2",
+        "schedule": "EVERY_1_MIN",
+        "jaceId": 1
+    }, {
+        "id": "@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone3",
+        "schedule": "EVERY_2_MIN",
+        "jaceId": 1
+    }, {
+        "id": "@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone4",
+        "schedule": "EVERY_2_MIN",
+        "jaceId": 1
+    }, {
+        "id": "@C.Drivers.NdioNetwork.NdioBoard2.points.SprinklerZone5",
+        "schedule": "EVERY_5_MIN",
+        "jaceId": 1
+    }]
+}

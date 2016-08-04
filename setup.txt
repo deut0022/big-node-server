@@ -1,0 +1,32 @@
+/////////
+// To run the BIG server, here's what you need to do...
+/////////
+
+// One-time setup
+1) Install Node.js on you machine
+-  download the installer from nodejs.org
+-  This will install npm, the node package manager
+
+2) Install the packages for the Server
+-  In a terminal window navigate to to the package.json file
+-  Execute the command: npm install
+
+// Starting the server
+-  In a terminal, navigate to the big-server.js file
+-  Execute the command: node big-server
+
+// Stopping the Server
+-  Kill the node process.  Ir running in an open terminal, ctrl-c
+
+/// developing mode
+// install node-debug
+// execute command: node-debug big-server.js
+
+// Old Sprinkler JACE
+http://172.20.12.88/haystack/read?filter=point
+http://172.20.12.88/haystack/read?id=@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone2
+
+// N4 JACE
+http://172.20.88.119/haystack/read?filter=point
+Basic Auth username: Matt
+Basic Auth password: Matt1234
