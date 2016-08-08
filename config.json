@@ -4,7 +4,7 @@
     "weatherLoggingEnabled": true,
     "weatherConfig": {
       "host": "api.openweathermap.org",
-      "path": "/data/2.5/weather?id=5025219&APPID=a7df4adc18d04bf6d7333877bb7cb5fa",
+      "path": "/data/2.5/weather?id=5025219&APPID=xxxx",
       "schedule": "EVERY_30_MIN"
     },
     "splunkConfig": {
@@ -12,7 +12,7 @@
         "username": "",
         "password": "",
         "username-parallel": "admin",
-        "password-parallel": "Password1",
+        "password-parallel": "xxxx",
         "port": 9997,
         "scheme": "http",
         "pointsIndex": "parallel",
@@ -21,11 +21,10 @@
     },
     "jaces": [{
         "id": 1,
-        "host": "172.20.12.88",
+        "host": "xxx",
         "name": "Parallel Sprinkler JACE",
         "username": "admin",
-        "password": "PTI!7667",
-        "authenticationType": "BASIC"
+        "password": "xxx"
     }],
     "points": [{
         "id": "@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone1",
