@@ -12,11 +12,12 @@
 -  Execute the command: npm install
 
 // Starting the server
--  In a terminal, navigate to the big-server.js file
--  Execute the command: node big-server
+-  If running as a service on windows (see steps below), open the "Services" panel and start the "BIG Server - nodjs"
+-  To run in a terminal, from a terminal, navigate to the big-server.js file and execute the command: node big-server
 
 // Stopping the Server
--  Kill the node process.  Ir running in an open terminal, ctrl-c
+-  If running as a service on windows, open the "Services" panel and stop the "BIG Server - nodjs"
+-  If running in an open terminal, ctrl-c to kill the process.
 
 /// developing mode
 // install node-debug
@@ -30,3 +31,9 @@ http://172.20.12.88/haystack/read?id=@C.Drivers.NdioNetwork.NdioBoard.points.Spr
 http://172.20.88.119/haystack/read?filter=point
 Basic Auth username: Matt
 Basic Auth password: Matt1234
+
+// Follow these instructions to install the BIG node server as a service on windows
+// This was completed on the CHR-1 machine
+https://github.com/coreybutler/node-windows
+// from the root directory of the project execute:  node install-windows-service
+// to uninstall run: node uninstall-windows-service

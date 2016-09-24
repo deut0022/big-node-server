@@ -1,0 +1,25 @@
+// Need to clean the data
+- Remove the repeated point name on the "id"
+- Cleans the curValue
+  - kind: Number - cleanse the curValue
+    n:75.992 °F -> 75.992
+  - kind: Bool - no cleansing needed
+  - kind: Str - no cleansing needed
+-Ignore if axType: s:history:HistoryConfig
+
+// sample queries
+- single point
+index="parallel" id="C.Drivers.LonNetwork.RTU2.points.Monitor.spaceTemp" | timechart avg(curVal) span=15m
+
+- weather temp
+index="weather_ep"| eval tempF=(1.8*('main.temp' - 273)) + 32 | timechart span=1hr avg(tempF)
+
+-multiple points combined, weather temp overlay
+index="parallel" | search id="C.Drivers.LonNetwork.RTU1.points.Monitor.spaceTemp" | timechart avg(curVal) span=60m as RTU1
+| appendcols [search id="C.Drivers.LonNetwork.RTU2.points.Monitor.spaceTemp" | timechart avg(curVal) span=60m as RTU2 | fields RTU2]
+| appendcols [search id="C.Drivers.LonNetwork.RTU3.points.Monitor.spaceTemp" | timechart avg(curVal) span=60m as RTU3| fields RTU3]
+| appendcols [search index="weather_ep" | eval tempF=(1.8*('main.temp' - 273)) + 32 | timechart span=1hr avg(tempF) as OutsideTemp | fields OutsideTemp]
+
+- show sprinker activity
+index="parallel" id="C.Drivers.NiagaraNetwork.Sprinkler.points.Sprinkler.Zone1" | timechart count(eval(curVal==true)) as ON span=5min
+index="parallel" id="@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone1" | timechart count(eval(curVal==true)) as ON span=5min

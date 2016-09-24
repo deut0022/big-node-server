@@ -11,14 +11,19 @@ var schedule = require('node-cron');
 var http = require('http');
 var config = require('./config.json');
 var winston = require('winston');
+
+new (winston.transports.Console)({'timestamp':true})
+
 var logger = new(winston.Logger)({
     transports: [
         new(winston.transports.Console)({
-            level: config.logLevel
+            'level': config.logLevel,
+            'timestamp': true
         }),
         new(winston.transports.File)({
-            filename: 'big-server.log',
-            level: config.logLevel
+            'filename': 'big-server.log',
+            'level': config.logLevel,
+            'timestamp': true
         })
     ]
 });
@@ -31,6 +36,7 @@ var schedules = {
     EVERY_15_MIN: 'EVERY_15_MIN',
     EVERY_30_MIN: 'EVERY_30_MIN',
     EVERY_1_HR: 'EVERY_1_HR',
+    EVERY_12_HR: 'EVERY_12_HR'
 }
 
 // Create a Splunk Service instance and log in
@@ -65,6 +71,7 @@ var buildReadPointsPostBody = function(points) {
 
 var readAndLogWeather = function(schedule) {
     if (config.weatherConfig.schedule == schedule) {
+        logger.info(">>>>>>>>>> Logging weather data: " + schedule);
         var getOptions = {
             host: config.weatherConfig.host,
             path: config.weatherConfig.path,
@@ -129,11 +136,61 @@ var readAndLogPointValues = function(points, jaceId) {
 }
 
 var logPointValues = function(records) {
-    logger.info('>>>>> Logging [ ' + records.length + ' ] point values');
-    _.each(records, function(row) {
-        delete row.actions; // remove the 'actions' node to reduce size of payload
-        logToSplunk(config.splunkConfig.pointsIndex, row);
+    logger.info('>>>>> Retrieved [ ' + records.length + ' ] point values');
+    var j = 0;
+    _.each(records, function(row, i) {
+        if ('curVal' in row) {
+          j++;
+          row = cleanseData(row);
+          logToSplunk(config.splunkConfig.pointsIndex, row);
+          // delay 50 millis between each splunk log, needed to avoid multiple event payloads in one event
+          // setTimeout(function () {
+          //   logger.info('>>>>> point logged to splunk');
+          //   logToSplunk(config.splunkConfig.pointsIndex, row);
+          // }, 50 * i);
+        } else {
+          logger.debug('>>>>>>>>>> Not logging point with Id [ ' + row.id + ' ] because it is has no curVal');
+        }
+
     });
+
+    logger.info('>>>>> Logged total of [ ' + j + ' ] point values');
+}
+
+var cleanseData = function(rawData) {
+    // remove data that is returned from the JACE but doesn't need to be loged.  This reduced payload to splunk.
+    delete rawData.actions;
+    delete rawData.cur;
+    delete rawData.writable;
+    delete rawData.enum;
+    delete rawData.point;
+    delete rawData.axType;
+    // remove repeated point id info, if exists
+    var indexOfFirstSpace = rawData.id.indexOf(' ');
+    rawData.id = rawData.id.substring(0, indexOfFirstSpace);
+    // remove the "r:" prefix if it exists
+    if (rawData.id.indexOf('r:') > -1){
+      rawData.id = rawData.id.substring(2,rawData.id.length);
+    }
+    if (rawData.kind == 'Number') {
+      rawData.curVal = cleanseNumeric(rawData.curVal)
+    }
+    if ('precision' in rawData) {
+      rawData.precision = cleanseNumeric(rawData.precision)
+    }
+    if ('maxVal' in rawData) {
+      rawData.maxVal = cleanseNumeric(rawData.maxVal)
+    }
+    if ('minVal' in rawData) {
+      rawData.minVal = cleanseNumeric(rawData.minVal)
+    }
+    return rawData;
+}
+
+var cleanseNumeric = function(value) {
+  // remove any prefixes or non-numeric characters from the value.
+  // ex: "n:73.987 F" --> 73.987
+  return Number(value.replace(/[^0-9\.]+/g,""));
 }
 
 var logToSplunk = function(index, payload) {
@@ -161,7 +218,7 @@ var getJaceIds = function() {
 var getJaceConfigForId = function(jaceId) {
   var jaceConfig = null;
   _.each(config.jaces, function(jace) {
-    if (jace.id = jaceId) {
+    if (jace.id == jaceId) {
       jaceConfig = jace;
     }
   });
@@ -175,41 +232,34 @@ var initiateScheduledPointLogging = function(schedule) {
   });
 }
 
-var s1 = schedule.schedule('0 */1 * * * *', function() {
-    logger.info(">>>>> Start 1 minute scheduled job");
-    initiateScheduledPointLogging(schedules.EVERY_1_MIN);
-    readAndLogWeather(schedules.EVERY_1_MIN);
-});
-
-var s2 = schedule.schedule('5 */2 * * * *', function() {
-    logger.info(">>>>> Start 2 minute scheduled job");
-    readAndLogPointValues(getPointsForSchedule(schedules.EVERY_2_MIN, 1), 1);
-    readAndLogWeather(schedules.EVERY_2_MIN);
-});
-var s5 = schedule.schedule('10 */5 * * * *', function() {
-    logger.info(">>>>> Start 5 minute scheduled job");
-    initiateScheduledPointLogging(schedules.EVERY_5_MIN);
-    readAndLogWeather(schedules.EVERY_5_MIN);
-});
-var s10 = schedule.schedule('15 */10 * * * *', function() {
-    logger.info(">>>>> Start 10 minute scheduled job");
-    initiateScheduledPointLogging(schedules.EVERY_10_MIN);
-    readAndLogWeather(schedules.EVERY_10_MIN);
-});
-var s15 = schedule.schedule('20 */15 * * * *', function() {
+// var s5 = schedule.schedule('0 */5 * * * *', function() {
+//     logger.info(">>>>> Start 5 minute scheduled job");
+//     initiateScheduledPointLogging(schedules.EVERY_5_MIN);
+//     readAndLogWeather(schedules.EVERY_5_MIN);
+// });
+var s15 = schedule.schedule('0 */15 * * * *', function() {
     logger.info(">>>>> Start 15 minute scheduled job");
     initiateScheduledPointLogging(schedules.EVERY_15_MIN);
     readAndLogWeather(schedules.EVERY_15_MIN);
 });
-var s30 = schedule.schedule('25 */30 * * * *', function() {
+var s30 = schedule.schedule('5 */30 * * * *', function() {
     logger.info(">>>>> Start 30 minute scheduled job");
     initiateScheduledPointLogging(schedules.EVERY_30_MIN);
     readAndLogWeather(schedules.EVERY_30_MIN);
 });
-var s60 = schedule.schedule('30 0 */1 * * *', function() {
-    logger.info(">>>>> Start 60 minute scheduled job");
-    initiateScheduledPointLogging(schedules.EVERY_30_MIN);
-    readAndLogWeather(schedules.EVERY_60_MIN);
+
+// var test4 = schedule.schedule('10 1 1,24 * * *', function() {
+//     logger.info(">>>>> Start test job 5");
+// });
+
+// var s60 = schedule.schedule('30 0 */1 * * *', function() {
+//     logger.info(">>>>> Start 60 minute scheduled job");
+//     initiateScheduledPointLogging(schedules.EVERY_30_MIN);
+//     readAndLogWeather(schedules.EVERY_60_MIN);
+// });
+var s12hr = schedule.schedule('10 0 0,12 * * *', function() {
+    logger.info(">>>>> Start 12 Hr scheduled job");
+    initiateScheduledPointLogging(schedules.EVERY_12_HR);
 });
 
 app.use(bodyParser.json()); // support JSON-encoded bodies
@@ -224,11 +274,21 @@ app.get('/config/:clientId', function(req, res) {
 });
 
 app.get('/log15minutepoints', function(req, res) {
-    logger.debug(">>>>> Manually triggerd 15 minute points to be logged");
-    var points = getPointsForSchedule(schedules.EVERY_15_MIN);
-    if (points) {
-        readAndLogPointValues(points);
-    }
+    logger.info(">>>>> Manually triggered 15 minute points to be logged");
+    initiateScheduledPointLogging(schedules.EVERY_15_MIN);
+    readAndLogWeather(schedules.EVERY_15_MIN);
+    res.sendStatus(200);
+});
+app.get('/log30minutepoints', function(req, res) {
+    logger.info(">>>>> Manually triggered 30 minute points to be logged");
+    initiateScheduledPointLogging(schedules.EVERY_30_MIN);
+    readAndLogWeather(schedules.EVERY_30_MIN);
+    res.sendStatus(200);
+});
+app.get('/log12hourpoints', function(req, res) {
+    logger.info(">>>>> Manually triggered 12 hour points to be logged");
+    initiateScheduledPointLogging(schedules.EVERY_12_HR);
+    readAndLogWeather(schedules.EVERY_12_HR);
     res.sendStatus(200);
 });
 
@@ -241,7 +301,7 @@ process.on('uncaughtException', function(err) {
 
 logger.warn("######################################################");
 logger.warn("####                                              ####");
-logger.warn("#### BIG Server Started - listenting on port 8081 ####");
+logger.warn("#### BIG Server Started - listening on port 8081 ####");
 logger.warn("####                                              ####");
 logger.warn("######################################################");
 
