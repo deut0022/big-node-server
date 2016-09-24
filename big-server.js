@@ -232,6 +232,11 @@ var initiateScheduledPointLogging = function(schedule) {
   });
 }
 
+var s5 = schedule.schedule('0 */2 * * * *', function() {
+    logger.info(">>>>> Start 2 minute scheduled job");
+    initiateScheduledPointLogging(schedules.EVERY_2_MIN);
+    readAndLogWeather(schedules.EVERY_2_MIN);
+});
 // var s5 = schedule.schedule('0 */5 * * * *', function() {
 //     logger.info(">>>>> Start 5 minute scheduled job");
 //     initiateScheduledPointLogging(schedules.EVERY_5_MIN);
@@ -273,6 +278,12 @@ app.get('/config/:clientId', function(req, res) {
     res.send(JSON.stringify(config));
 });
 
+app.get('/log2minutepoints', function(req, res) {
+    logger.info(">>>>> Manually triggered 2 minute points to be logged");
+    initiateScheduledPointLogging(schedules.EVERY_2_MIN);
+    readAndLogWeather(schedules.EVERY_2_MIN);
+    res.sendStatus(200);
+});
 app.get('/log15minutepoints', function(req, res) {
     logger.info(">>>>> Manually triggered 15 minute points to be logged");
     initiateScheduledPointLogging(schedules.EVERY_15_MIN);
