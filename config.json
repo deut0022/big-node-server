@@ -4,7 +4,7 @@
     "weatherLoggingEnabled": true,
     "weatherConfig": {
       "host": "api.openweathermap.org",
-      "path": "/data/2.5/weather?id=5025219&APPID=xxx",
+      "path": "/data/2.5/weather?id=5025219&APPID=a7df4adc18d04bf6d7333877bb7cb5fa",
       "schedule": "EVERY_30_MIN"
     },
     "splunkConfig": {
@@ -12,7 +12,7 @@
         "username": "",
         "password": "",
         "username-parallel": "admin",
-        "password-parallel": "xxx",
+        "password-parallel": "Password1",
         "port": 9997,
         "scheme": "http",
         "pointsIndex": "parallel",
@@ -25,14 +25,14 @@
           "host": "172.20.88.119",
           "name": "Parallel N4 JACE",
           "username": "Matt",
-          "password": "xxx",
+          "password": "Matt1234",
           "authenticationType": "BASIC"
       },{
           "id": 2,
           "host": "172.20.12.88",
           "name": "Old Sprinkler JACE",
           "username": "admin",
-          "password": "xxx",
+          "password": "PTI!7667",
           "authenticationType": "BASIC"
       }],
     "points": [

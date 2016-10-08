@@ -21,5 +21,13 @@ index="parallel" | search id="C.Drivers.LonNetwork.RTU1.points.Monitor.spaceTemp
 | appendcols [search index="weather_ep" | eval tempF=(1.8*('main.temp' - 273)) + 32 | timechart span=1hr avg(tempF) as OutsideTemp | fields OutsideTemp]
 
 - show sprinker activity
-index="parallel" id="C.Drivers.NiagaraNetwork.Sprinkler.points.Sprinkler.Zone1" | timechart count(eval(curVal==true)) as ON span=5min
-index="parallel" id="@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone1" | timechart count(eval(curVal==true)) as ON span=5min
+index="parallel" id="C.Drivers.NiagaraNetwork.Sprinkler.points.Sprinkler.Zone1" curVal=true | timechart span=2min count
+index="parallel" id="@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone1" curVal=true | timechart span=2min count
+
+index="parallel"  id="@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone1" curVal=true | timechart span=1hr count as Zone1
+
+index="parallel"  id="@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone1" curVal=true | timechart span=2min count as Zone1 | appendcols [search index="parallel" id="@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone2" curVal=true | timechart span=2min count as Zone2] | appendcols [search index="parallel" id="@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone3" curVal=true | timechart span=2min count as Zone3] | appendcols [search index="parallel" id="@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone4" curVal=true | timechart span=2min count as Zone4]| appendcols [search index="parallel" id="@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone5" curVal=true | timechart span=2min count as Zone5]
+
+index="parallel"  id="@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone1" curVal=true | timechart span=30min count as Zone1 | appendcols [search index="parallel" id="@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone2" curVal=true | timechart span=30min count as Zone2] | appendcols [search index="parallel" id="@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone3" curVal=true | timechart span=30min count as Zone3] | appendcols [search index="parallel" id="@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone4" curVal=true | timechart span=30min count as Zone4]| appendcols [search index="parallel" id="@C.Drivers.NdioNetwork.NdioBoard.points.SprinklerZone5" curVal=true | timechart span=30min count as Zone5]
+
+xxxxx
